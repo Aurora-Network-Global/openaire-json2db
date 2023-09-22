@@ -34,7 +34,7 @@ def remove_definitions_from_schema(json_schema):
         del json_schema["definitions"]
     
     # Recursively remove from nested objects
-    for key, value in json_schema.items():
+    for key, value in list(json_schema.items()):  # Create a list of items for iteration
         if isinstance(value, dict):
             remove_definitions_from_schema(value)
             
