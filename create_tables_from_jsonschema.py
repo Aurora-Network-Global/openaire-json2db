@@ -178,10 +178,18 @@ def load_data_to_mongodb_with_validation_updated():
     # Close the MongoDB connection
     client.close()
 
+from pymongo import MongoClient, errors
+
 def load_data_without_validation():
     # Establish a connection to the MongoDB server
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
+    
+    # Check the initial count of documents in the collection (if it exists)
+    initial_count = 0
+    if COLLECTION_NAME in db.list_collection_names():
+        initial_count = db[COLLECTION_NAME].count_documents({})
+        print(f"Initial document count in {COLLECTION_NAME}: {initial_count}")
     
     # Drop the collection if it exists to ensure no validators
     if COLLECTION_NAME in db.list_collection_names():
@@ -203,8 +211,12 @@ def load_data_without_validation():
             print(f"Error: File '{filepath}' not found.")
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON data from '{filepath}': {e}")
-        except pymongo.errors.PyMongoError as e:
+        except errors.PyMongoError as e:
             print(f"Error inserting data into MongoDB: {e}")
+    
+    # Check the count of documents in the collection after data ingestion
+    final_count = collection.count_documents({})
+    print(f"Final document count in {COLLECTION_NAME}: {final_count}")
     
     # Close the MongoDB connection
     client.close()
