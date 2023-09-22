@@ -40,6 +40,20 @@ def remove_definitions_from_schema(json_schema):
             
     return json_schema
 
+def remove_ref_from_schema(json_schema):
+    """
+    Remove the '$ref' keyword and any references to it from the JSON schema.
+    """
+    if "$ref" in json_schema:
+        del json_schema["$ref"]
+    
+    # Recursively remove from nested objects
+    for key, value in list(json_schema.items()):  # Create a list of items for iteration
+        if isinstance(value, dict):
+            remove_ref_from_schema(value)
+
+    return json_schema
+
 def convert_to_mongodb_schema(json_schema):
     # Handle unsupported keywords
     unsupported_keywords = ["$schema"]
@@ -50,6 +64,9 @@ def convert_to_mongodb_schema(json_schema):
 
     # Remove 'definitions' keyword
     json_schema = remove_definitions_from_schema(json_schema)
+
+    # Remove '$ref' keyword
+    json_schema = remove_ref_from_schema(json_schema)
 
     # Convert JSON schema to MongoDB format
     keyword_mapping = {
