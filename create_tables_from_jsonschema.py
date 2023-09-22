@@ -42,17 +42,30 @@ def remove_definitions_from_schema(json_schema):
 
 def remove_ref_from_schema(json_schema):
     """
-    Remove the '$ref' keyword and any references to it from the JSON schema.
+    Remove the '$ref' keyword and any properties containing it from the JSON schema.
     """
     if "$ref" in json_schema:
         del json_schema["$ref"]
     
-    # Recursively remove from nested objects
-    for key, value in list(json_schema.items()):  # Create a list of items for iteration
+    # Recursively remove from nested objects and arrays
+    keys_to_delete = []
+    for key, value in json_schema.items():
         if isinstance(value, dict):
-            remove_ref_from_schema(value)
+            if "$ref" in value:
+                keys_to_delete.append(key)  # Mark the key for deletion
+            else:
+                remove_ref_from_schema(value)
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    remove_ref_from_schema(item)
+    
+    # Delete marked keys
+    for key in keys_to_delete:
+        del json_schema[key]
 
     return json_schema
+
 
 def convert_to_mongodb_schema(json_schema):
     # Handle unsupported keywords
