@@ -1,0 +1,22 @@
+# JSON 2 MongoDB Configuration file: First, rename config-example.yaml to config.yaml
+
+
+# MongoDB Configuration
+
+## The connection URI for the MongoDB server.
+MONGO_URI: "mongodb://localhost:27017/"
+
+## Name of the MongoDB database. (If its does not exist, it will be created.)
+DB_NAME: "your_database_name"
+
+## Name of the MongoDB collection. (If its does not exist, it will be created.)
+COLLECTION_NAME: "your_collection_name"
+
+
+# File paths and directories
+
+## Path to the JSON schema file. "path/to/community_result_schema.json"
+SCHEMA_FILE: "./json-schema/community_result_schema.json"
+
+# Directory containing the gzipped JSON files. "path/to/json-parts/"
+JSON_PARTS_DIR: "./json-parts/Netherlands"
