@@ -178,5 +178,41 @@ def load_data_to_mongodb_with_validation_updated():
     # Close the MongoDB connection
     client.close()
 
+def load_data_without_validation():
+    # Establish a connection to the MongoDB server
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    
+    # Check if the collection already exists
+    collection_names = db.list_collection_names()
+    if COLLECTION_NAME not in collection_names:
+        # Create a new collection without a schema validator
+        db.create_collection(COLLECTION_NAME)
+        
+    collection = db[COLLECTION_NAME]
+    
+    # Loop through each gzipped JSON file in the directory
+    for filename in json_files:
+        filepath = os.path.join(JSON_PARTS_DIR, filename)
+        try:
+            with gzip.open(filepath, 'rt') as file:
+                for line in file:
+                    record = json.loads(line)
+                    collection.insert_one(record)
+        except FileNotFoundError:
+            print(f"Error: File '{filepath}' not found.")
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON data from '{filepath}': {e}")
+        except pymongo.errors.PyMongoError as e:
+            print(f"Error inserting data into MongoDB: {e}")
+    
+    # Close the MongoDB connection
+    client.close()
+
+# Execute the function
+load_data_without_validation()
+
+"""
 # Execute the function
 load_data_to_mongodb_with_validation_updated()
+"""
