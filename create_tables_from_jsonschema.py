@@ -102,6 +102,8 @@ except json.JSONDecodeError as e:
 mongodb_schema = {
     "$jsonSchema": convert_to_mongodb_schema(original_schema)
 }
+print(json.dumps(mongodb_schema, indent=4))  # Pretty print the schema
+
 VALIDATOR = {
     "$jsonSchema": mongodb_schema["$jsonSchema"]
 }
