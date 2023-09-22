@@ -3,6 +3,7 @@ import os
 import gzip
 import json
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 import yaml
 from sys import exit
 
@@ -171,7 +172,7 @@ def load_data_to_mongodb_with_validation_updated():
             print(f"Error: File '{filepath}' not found.")
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON data from '{filepath}': {e}")
-        except pymongo.errors.PyMongoError as e:
+        except PyMongoError as e:
             print(f"Error inserting data into MongoDB: {e}")
     
     # Close the MongoDB connection
