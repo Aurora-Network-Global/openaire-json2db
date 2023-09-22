@@ -2,7 +2,7 @@
 import os
 import gzip
 import json
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 from pymongo.errors import PyMongoError
 import yaml
 from sys import exit
@@ -178,8 +178,6 @@ def load_data_to_mongodb_with_validation_updated():
     # Close the MongoDB connection
     client.close()
 
-from pymongo import MongoClient, errors
-
 def load_data_without_validation():
     # Establish a connection to the MongoDB server
     client = MongoClient(MONGO_URI)
@@ -199,6 +197,10 @@ def load_data_without_validation():
     db.create_collection(COLLECTION_NAME)
     collection = db[COLLECTION_NAME]
     
+    # Initialize a counter for the progress indicator
+    record_counter = 0
+    progress_step = 1000  # adjust this value based on your preference
+
     # Loop through each gzipped JSON file in the directory
     for filename in json_files:
         filepath = os.path.join(JSON_PARTS_DIR, filename)
@@ -207,6 +209,9 @@ def load_data_without_validation():
                 for line in file:
                     record = json.loads(line)
                     collection.insert_one(record)
+                    record_counter += 1
+                    if record_counter % progress_step == 0:
+                        print(f"Inserted {record_counter} records...")
         except FileNotFoundError:
             print(f"Error: File '{filepath}' not found.")
         except json.JSONDecodeError as e:
@@ -223,6 +228,7 @@ def load_data_without_validation():
 
 # Execute the function
 load_data_without_validation()
+
 
 """
 # Execute the function
