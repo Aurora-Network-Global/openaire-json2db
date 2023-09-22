@@ -1,13 +1,9 @@
 # Load libraries needed for running the script
-try:
-    import os
-    import gzip
-    import json
-    from pymongo import MongoClient
-    import yaml
-except ImportError as e:
-    print(f"Error importing necessary modules: {e}")
-    exit(1)
+import os
+import gzip
+import json
+from pymongo import MongoClient
+import yaml
 
 # Load configuration from config.yaml
 try:
@@ -30,17 +26,19 @@ SCHEMA_FILE = config['SCHEMA_FILE']
 JSON_PARTS_DIR = config['JSON_PARTS_DIR']
 
 def convert_to_mongodb_schema(json_schema):
-    """
-    Convert JSON schema to a format suitable for MongoDB validation.
-    This is a basic converter and may not handle all intricacies of the JSON schema.
-    """
-    # MongoDB uses a different set of keywords for schema validation
+    # Handle unsupported keywords
+    unsupported_keywords = ["$schema"]
+    for keyword in unsupported_keywords:
+        if keyword in json_schema:
+            print(f"Warning: Removing unsupported keyword '{keyword}' for MongoDB validation.")
+            del json_schema[keyword]
+
+    # Convert JSON schema to MongoDB format
     keyword_mapping = {
         "properties": "properties",
         "required": "required",
         "type": "bsonType"
     }
-
     mongodb_schema = {}
     for key, value in json_schema.items():
         if key in keyword_mapping:
@@ -65,13 +63,10 @@ except json.JSONDecodeError as e:
     print(f"Error parsing JSON schema file: {e}")
     exit(1)
 
-
 # Convert the provided JSON schema to MongoDB format
 mongodb_schema = {
     "$jsonSchema": convert_to_mongodb_schema(original_schema)
 }
-
-# Use the converted MongoDB schema to validate the ingested data
 VALIDATOR = {
     "$jsonSchema": mongodb_schema["$jsonSchema"]
 }
