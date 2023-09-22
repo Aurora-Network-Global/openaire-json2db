@@ -66,19 +66,19 @@ def remove_ref_from_schema(json_schema):
 
     return json_schema
 
-def replace_integer_with_long(json_schema):
+def replace_integer_with_int(json_schema):
     """
-    Recursively replace the type 'integer' with 'long' in the JSON schema.
+    Recursively replace the type 'integer' with 'int' in the JSON schema.
     """
     if isinstance(json_schema, dict):
         for key, value in json_schema.items():
             if key == "type" and value == "integer":
-                json_schema[key] = "long"
+                json_schema[key] = "int"
             else:
-                replace_integer_with_long(value)
+                replace_integer_with_int(value)
     elif isinstance(json_schema, list):
         for item in json_schema:
-            replace_integer_with_long(item)
+            replace_integer_with_int(item)
     return json_schema
 
 
@@ -96,8 +96,8 @@ def convert_to_mongodb_schema(json_schema):
     # Remove '$ref' keyword
     json_schema = remove_ref_from_schema(json_schema)
     
-    # Replace 'integer' type with 'long'
-    json_schema = replace_integer_with_long(json_schema)
+    # Replace 'integer' type with 'int'
+    json_schema = replace_integer_with_int(json_schema)
 
     # Convert JSON schema to MongoDB format
     keyword_mapping = {
