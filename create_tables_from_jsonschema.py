@@ -183,12 +183,12 @@ def load_data_without_validation():
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
     
-    # Check if the collection already exists
-    collection_names = db.list_collection_names()
-    if COLLECTION_NAME not in collection_names:
-        # Create a new collection without a schema validator
-        db.create_collection(COLLECTION_NAME)
+    # Drop the collection if it exists to ensure no validators
+    if COLLECTION_NAME in db.list_collection_names():
+        db[COLLECTION_NAME].drop()
         
+    # Create a new collection without a schema validator
+    db.create_collection(COLLECTION_NAME)
     collection = db[COLLECTION_NAME]
     
     # Loop through each gzipped JSON file in the directory
