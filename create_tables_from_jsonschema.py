@@ -4,6 +4,7 @@ import gzip
 import json
 from pymongo import MongoClient
 import yaml
+from sys import exit
 
 # Load configuration from config.yaml
 try:
@@ -25,6 +26,20 @@ COLLECTION_NAME = config['COLLECTION_NAME']
 SCHEMA_FILE = config['SCHEMA_FILE']
 JSON_PARTS_DIR = config['JSON_PARTS_DIR']
 
+def remove_definitions_from_schema(json_schema):
+    """
+    Remove the 'definitions' keyword and any references to it from the JSON schema.
+    """
+    if "definitions" in json_schema:
+        del json_schema["definitions"]
+    
+    # Recursively remove from nested objects
+    for key, value in json_schema.items():
+        if isinstance(value, dict):
+            remove_definitions_from_schema(value)
+            
+    return json_schema
+
 def convert_to_mongodb_schema(json_schema):
     # Handle unsupported keywords
     unsupported_keywords = ["$schema"]
@@ -32,6 +47,9 @@ def convert_to_mongodb_schema(json_schema):
         if keyword in json_schema:
             print(f"Warning: Removing unsupported keyword '{keyword}' for MongoDB validation.")
             del json_schema[keyword]
+
+    # Remove 'definitions' keyword
+    json_schema = remove_definitions_from_schema(json_schema)
 
     # Convert JSON schema to MongoDB format
     keyword_mapping = {
